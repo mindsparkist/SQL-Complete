@@ -93,3 +93,65 @@ SELECT * FROM customers
 ORDER BY state DESC, first_name ASC; 
 
 ```
+
+The **LIMIT** clause is used to specify the maximum number of records the result set should return. This is incredibly useful for **pagination** (like seeing "Page 1, 2, 3" on a website) or when you only need to see a quick sample of a large table.
+
+---
+
+## 1. BASIC SYNTAX
+
+The **LIMIT** clause always comes at the very end of your **SELECT** statement. If you use it with **ORDER BY**, the sorting happens first, and then the engine "cuts" the list at your specified number.
+
+```sql
+-- get the top 3 loyal customers from your sql_store database
+USE sql_store;
+
+SELECT * FROM customers
+ORDER BY points DESC
+LIMIT 3; 
+
+```
+
+---
+
+## 2. OFFSET FOR PAGINATION
+
+Expert developers use a second argument with **LIMIT** to skip a specific number of rows. This is known as an **OFFSET**.
+
+* **SYNTAX**: `LIMIT [offset], [row_count]`
+* **LOGIC**: The first number tells the engine how many rows to **skip**, and the second number tells it how many to **retrieve**.
+
+```sql
+-- skip the first 6 customers and get the next 3
+-- this would be "page 3" if each page had 3 items
+SELECT * FROM customers
+LIMIT 6, 3; 
+
+```
+
+---
+
+## 3. KEY RULES TO REMEMBER
+
+* **POSITION**: It must be the last clause in your query (after **WHERE**, **GROUP BY**, and **ORDER BY**).
+* **DATABASE VARIATION**: While **LIMIT** is standard in **MYSQL**, **POSTGRESQL**, and **SQLITE**, other engines use different keywords:
+* **SQL SERVER**: Uses `SELECT TOP (n)`.
+* **ORACLE**: Uses `FETCH FIRST n ROWS ONLY`.
+
+
+
+---
+
+## EXPERT EXAMPLE: THE "NEWEST INVOICES"
+
+Using the `sql_invoicing` database you uploaded, here is how you would find the 5 most recent invoices that haven't been fully paid yet:
+
+```sql
+USE sql_invoicing;
+
+SELECT * FROM invoices
+WHERE payment_total < invoice_total
+ORDER BY invoice_date DESC
+LIMIT 5; 
+
+```
