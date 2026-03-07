@@ -121,3 +121,106 @@ LEFT JOIN orders o ON c.customer_id = o.customer_id
 LEFT JOIN shippers sh ON o.shipper_id = sh.shipper_id;
 
 ```
+In advanced SQL development, mastering how to combine data from the same table or across different record sets is essential for complex reporting and data analysis.
+
+---
+
+## 9. SELF OUTER JOINS
+
+A **SELF JOIN** occurs when you join a table with itself. This is common for hierarchical data (like an organizational chart). When you use an **OUTER JOIN** (specifically a **LEFT JOIN**) in a self-join, you ensure that the "top-level" records (those without a parent/manager) are not excluded from the results.
+
+```sql
+-- example: showing all employees and their managers from your sql_hr database
+USE sql_hr;
+
+SELECT 
+    e.first_name AS employee,
+    m.first_name AS manager
+FROM employees e
+LEFT JOIN employees m 
+    ON e.reports_to = m.employee_id;
+-- using LEFT JOIN ensures the CEO (who reports to NULL) still appears
+
+```
+
+---
+
+## 10. THE USING CLAUSE
+
+When the column names used for joining are **identical** in both tables, you can use the **USING** keyword to simplify your query. It replaces the `ON tableA.id = tableB.id` syntax.
+
+```sql
+-- joining customers and orders where both have 'customer_id'
+USE sql_store;
+
+SELECT 
+    o.order_id,
+    c.first_name
+FROM orders o
+JOIN customers c USING (customer_id);
+
+```
+
+---
+
+## 11. NATURAL JOIN (NOT RECOMMENDED)
+
+A **NATURAL JOIN** is a join that happens "automatically" based on columns with the same name.
+
+* **WHY IT IS NOT RECOMMENDED**: It is dangerous because the database engine makes assumptions. If someone adds a column to one table with the same name as a column in another (even if they aren't related), the query will break or produce incorrect data. **Expert advice:** Always be explicit with your join conditions.
+
+```sql
+-- dangerous: the engine guesses the join columns
+SELECT *
+FROM orders o
+NATURAL JOIN customers c;
+
+```
+
+---
+
+## 12. CROSS JOINS
+
+A **CROSS JOIN** produces a **Cartesian Product**, meaning every row from the first table is joined with every row from the second table.
+
+* **USE CASE**: Useful for generating combinations, such as matching every color with every size in a clothing store.
+
+```sql
+-- explicit syntax
+SELECT s.name AS shipper, p.name AS product
+FROM shippers s
+CROSS JOIN products p;
+
+-- implicit syntax
+SELECT s.name, p.name
+FROM shippers s, products p;
+
+```
+
+---
+
+## 13. UNIONS
+
+While **JOINS** combine columns horizontally, a **UNION** combines rows vertically. This allows you to stack the results of multiple queries into one result set.
+
+### RULES FOR UNIONS:
+
+1. Both queries must return the same **number** of columns.
+2. The columns must have **compatible** data types.
+3. The column names of the **first** query determine the header names.
+
+```sql
+-- example: labeling customers based on their loyalty points
+USE sql_store;
+
+SELECT first_name, points, 'active' AS status
+FROM customers
+WHERE points >= 2000
+UNION
+SELECT first_name, points, 'archived' AS status
+FROM customers
+WHERE points < 2000
+ORDER BY first_name; 
+-- notice ORDER BY is applied to the final combined set
+
+```
